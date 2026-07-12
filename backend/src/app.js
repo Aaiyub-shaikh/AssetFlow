@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+
+import auditRoutes from "./routes/audits.js";
 import bookingRoutes from "./routes/bookings.js";
 import resourceRoutes from "./routes/resources.js";
 
@@ -15,16 +17,16 @@ app.use("/api/resources", resourceRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
-    message: "🚀 AssetFlow Backend Running"
+    message: "🚀 AssetFlow Backend Running",
   });
 });
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "OK",
-    message: "Server is healthy"
+    message: "Server is healthy",
   });
 });
 
