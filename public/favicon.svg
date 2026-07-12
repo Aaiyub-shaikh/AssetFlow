@@ -1,22 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="220" height="220">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366F1"></stop>
-      <stop offset="100%" stop-color="#8B5CF6"></stop>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"></stop>
+      <stop offset="100%" stop-color="#06B6D4"></stop>
     </linearGradient>
   </defs>
 
-  <!-- Background -->
-  <rect x="4" y="4" width="56" height="56" rx="16" fill="#0F172A"></rect>
+  <!-- Top -->
+  <rect x="52" y="14" width="24" height="24" rx="5" transform="rotate(45 64 26)" fill="#2563EB"></rect>
 
-  <!-- Asset Box -->
-  <path d="M20 24L32 18L44 24V40L32 46L20 40Z" fill="none" stroke="url(#grad)" stroke-width="3" stroke-linejoin="round"></path>
+  <!-- Right -->
+  <rect x="90" y="52" width="24" height="24" rx="5" transform="rotate(45 102 64)" fill="#2563EB"></rect>
 
-  <!-- Letter A -->
-  <path d="M32 22L26 38H29L30.5 34H33.5L35 38H38L32 22ZM31.4 31L32 29.2L32.6 31Z" fill="#FFFFFF"></path>
+  <!-- Bottom -->
+  <rect x="52" y="90" width="24" height="24" rx="5" transform="rotate(45 64 102)" fill="#2563EB"></rect>
 
-  <!-- Flow Arrow -->
-  <path d="M18 50C26 56 40 56 48 50" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round"></path>
+  <!-- Left -->
+  <rect x="14" y="52" width="24" height="24" rx="5" transform="rotate(45 26 64)" fill="#2563EB"></rect>
 
-  <path d="M45 47L48 50L45 53" fill="none" stroke="#22C55E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+  <!-- Flow Ring -->
+  <circle cx="64" cy="64" r="24" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 30"></circle>
+
+  <!-- Hub -->
+  <circle cx="64" cy="64" r="8" fill="#06B6D4"></circle>
 </svg>
