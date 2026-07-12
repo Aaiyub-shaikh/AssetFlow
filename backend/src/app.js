@@ -11,6 +11,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/resources", resourceRoutes);
+
 // Health Check Route
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -25,10 +29,5 @@ app.get("/api/health", (req, res) => {
     message: "Server is healthy",
   });
 });
-
-// API Routes
-app.use("/api/audits", auditRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/resources", resourceRoutes);
 
 export default app;

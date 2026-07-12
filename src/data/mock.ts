@@ -1,8 +1,9 @@
 import type {
   User, Organization, Department, Category, Asset, Allocation,
-  Transfer, Booking, MaintenanceRecord, Audit, Notification, Activity,
-  DashboardKPI, ChartDataPoint, TimelineEvent
+  Transfer, MaintenanceRecord, Audit, Notification, Activity,
+  DashboardKPI, ChartDataPoint, TimelineEvent,
 } from '@/types'
+import type { Resource } from '@/types/booking'
 
 export const currentUser: User = {
   id: 'usr-001',
@@ -15,6 +16,13 @@ export const currentUser: User = {
   phone: '+1 (555) 123-4567',
   joinedAt: '2022-03-15',
 }
+
+export const resources: Resource[] = [
+  { _id: 'res-001', name: 'Boardroom Alpha', type: 'conference_hall', location: 'HQ - Floor 5', capacity: 20, isActive: true, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+  { _id: 'res-002', name: 'Meeting Room Beta', type: 'meeting_room', location: 'HQ - Floor 4', capacity: 8, isActive: true, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+  { _id: 'res-003', name: 'Creative Workspace', type: 'workspace', location: 'HQ - Floor 3', capacity: 15, isActive: true, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+  { _id: 'res-004', name: 'Projector Pro', type: 'equipment', location: 'IT Storage', capacity: 1, isActive: true, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+];
 
 export const organization: Organization = {
   id: 'org-001',
@@ -95,11 +103,88 @@ export const transfers: Transfer[] = [
   { id: 'trf-004', assetId: 'ast-011', assetName: 'MacBook Pro 14" M3', assetTag: 'AF-LPT-004', fromDepartment: 'Engineering', toDepartment: 'IT Operations', requestedBy: 'Michael Torres', requestedAt: '2026-02-20', status: 'completed', priority: 'medium', reason: 'IT team expansion', approvedBy: 'Priya Sharma', completedAt: '2026-02-25' },
 ]
 
-export const bookings: Booking[] = [
-  { id: 'bkg-001', assetId: 'ast-005', assetName: 'ThinkPad X1 Carbon', assetTag: 'AF-LPT-003', bookedBy: 'Maria Garcia', bookedById: 'emp-008', department: 'Engineering', startDate: '2026-03-15', endDate: '2026-03-22', status: 'confirmed', purpose: 'Conference presentation', location: 'HQ - Floor 4' },
-  { id: 'bkg-002', assetId: 'ast-012', assetName: 'Samsung Galaxy Tab S9', assetTag: 'AF-MOB-002', bookedBy: 'Nina Patel', bookedById: 'emp-010', department: 'Marketing', startDate: '2026-03-20', endDate: '2026-03-25', status: 'pending', purpose: 'Client demo', location: 'Client Site' },
-  { id: 'bkg-003', assetId: 'ast-009', assetName: 'Tesla Model 3', assetTag: 'AF-VEH-001', bookedBy: 'Chris Lee', bookedById: 'emp-011', department: 'Sales', startDate: '2026-03-10', endDate: '2026-03-12', status: 'confirmed', purpose: 'Client visit - Bay Area', location: 'Various' },
-  { id: 'bkg-004', assetId: 'ast-008', assetName: 'HP LaserJet Pro', assetTag: 'AF-PRT-001', bookedBy: 'Rachel Green', bookedById: 'emp-012', department: 'Finance', startDate: '2026-03-08', endDate: '2026-03-08', status: 'completed', purpose: 'Quarterly report printing', location: 'HQ - Floor 2' },
+export const bookings: any[] = [
+  {
+    _id: 'bkg-001', id: 'bkg-001',
+    resource: resources[0],
+    title: 'Q2 Planning Session',
+    description: 'Quarterly planning with department heads',
+    bookedBy: { _id: 'usr-001', name: 'Sarah Chen', email: 'sarah.chen@assetflow.io' },
+    attendees: [{ _id: 'emp-002', name: 'Michael Torres', email: 'm.torres@assetflow.io' }],
+    startTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T09:00:00.000Z'),
+    endTime:   new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T10:30:00.000Z'),
+    status: 'upcoming',
+    reminderSent: false,
+    reminderTime: 15,
+    isCancellationAllowed: true,
+    createdAt: '2026-07-01T10:00:00Z',
+    updatedAt: '2026-07-01T10:00:00Z',
+  },
+  {
+    _id: 'bkg-002', id: 'bkg-002',
+    resource: resources[1],
+    title: 'Client Demo Walkthrough',
+    description: 'Demonstrate AssetFlow features to new client',
+    bookedBy: { _id: 'emp-010', name: 'Nina Patel', email: 'n.patel@assetflow.io' },
+    attendees: [],
+    startTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T14:00:00.000Z'),
+    endTime:   new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T15:00:00.000Z'),
+    status: 'upcoming',
+    reminderSent: false,
+    reminderTime: 30,
+    isCancellationAllowed: true,
+    createdAt: '2026-07-02T08:00:00Z',
+    updatedAt: '2026-07-02T08:00:00Z',
+  },
+  {
+    _id: 'bkg-003', id: 'bkg-003',
+    resource: resources[2],
+    title: 'Design Sprint Day 2',
+    description: 'UX design workshop for mobile app',
+    bookedBy: { _id: 'emp-011', name: 'Chris Lee', email: 'c.lee@assetflow.io' },
+    attendees: [{ _id: 'emp-012', name: 'Rachel Green', email: 'r.green@assetflow.io' }],
+    startTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    endTime:   new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    status: 'ongoing',
+    reminderSent: true,
+    reminderTime: 15,
+    isCancellationAllowed: false,
+    createdAt: '2026-07-05T07:00:00Z',
+    updatedAt: '2026-07-05T07:00:00Z',
+  },
+  {
+    _id: 'bkg-004', id: 'bkg-004',
+    resource: resources[0],
+    title: 'All-Hands Meeting',
+    description: 'Monthly company-wide update',
+    bookedBy: { _id: 'usr-001', name: 'Sarah Chen', email: 'sarah.chen@assetflow.io' },
+    attendees: [],
+    startTime: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T10:00:00.000Z'),
+    endTime:   new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T11:30:00.000Z'),
+    status: 'completed',
+    reminderSent: true,
+    reminderTime: 15,
+    isCancellationAllowed: false,
+    createdAt: '2026-07-01T09:00:00Z',
+    updatedAt: '2026-07-07T11:30:00Z',
+  },
+  {
+    _id: 'bkg-005', id: 'bkg-005',
+    resource: resources[1],
+    title: '1:1 Performance Review',
+    description: 'Cancelled due to travel conflict',
+    bookedBy: { _id: 'emp-008', name: 'Maria Garcia', email: 'm.garcia@assetflow.io' },
+    attendees: [],
+    startTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T15:00:00.000Z'),
+    endTime:   new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().replace(/T.*/, 'T16:00:00.000Z'),
+    status: 'cancelled',
+    reminderSent: false,
+    reminderTime: 15,
+    isCancellationAllowed: false,
+    cancellationReason: 'Travel conflict',
+    createdAt: '2026-07-03T10:00:00Z',
+    updatedAt: '2026-07-09T08:00:00Z',
+  },
 ]
 
 export const maintenanceRecords: MaintenanceRecord[] = [

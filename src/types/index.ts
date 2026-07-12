@@ -1,7 +1,7 @@
 export type AssetStatus = 'available' | 'allocated' | 'reserved' | 'maintenance' | 'retired' | 'lost'
 export type TransferStatus = 'pending' | 'approved' | 'in_transit' | 'completed' | 'rejected'
 export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed'
-export type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'overdue'
+export type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'overdue' | 'pending' | 'approved' | 'rejected' | 'assigned' | 'resolved'
 export type AuditStatus = 'planned' | 'in_progress' | 'completed' | 'overdue'
 export type Priority = 'low' | 'medium' | 'high' | 'critical'
 export type UserRole = 'admin' | 'manager' | 'department_head' | 'employee'
@@ -140,6 +140,7 @@ export interface MaintenanceRecord {
   cost: number
   description: string
   priority: Priority
+  photo?: string
 }
 
 export interface Audit {
