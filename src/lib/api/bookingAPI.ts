@@ -180,6 +180,22 @@ export const createBooking = async (data: any) => {
     };
 
     localBookings = [newBooking, ...bookings];
+
+    const { useNotificationStore } = await import("@/stores/notificationStore");
+    const resName = newBooking.resource?.name || newBooking.title || "Shared Resource";
+    useNotificationStore.getState().addNotification({
+      title: 'Booking Confirmed',
+      message: `Your booking for "${resName}" is confirmed for ${new Date(newBooking.startTime).toLocaleString()} - ${new Date(newBooking.endTime).toLocaleString()}.`,
+      type: 'success',
+      link: '/bookings'
+    });
+    useNotificationStore.getState().addActivity({
+      action: 'Booking Created',
+      description: `Booking for "${resName}" created by ${newBooking.bookedBy?.name || 'User'}`,
+      user: newBooking.bookedBy?.name || 'System User',
+      type: 'booking'
+    });
+
     return newBooking;
   }
 };
@@ -236,7 +252,24 @@ export const rescheduleBooking = async (
       endTime: newEndTime,
       notes: (localBookings[index].notes || "") + `\nRescheduled: ${reason}`
     };
-    return localBookings[index];
+
+    const rescheduledBooking = localBookings[index];
+    const { useNotificationStore } = await import("@/stores/notificationStore");
+    const resName = rescheduledBooking.resource?.name || rescheduledBooking.title || "Shared Resource";
+    useNotificationStore.getState().addNotification({
+      title: 'Booking Rescheduled',
+      message: `Your booking for "${resName}" is rescheduled to ${new Date(newStartTime).toLocaleString()} - ${new Date(newEndTime).toLocaleString()}.`,
+      type: 'info',
+      link: '/bookings'
+    });
+    useNotificationStore.getState().addActivity({
+      action: 'Booking Rescheduled',
+      description: `Rescheduled booking for "${resName}"`,
+      user: rescheduledBooking.bookedBy?.name || 'System User',
+      type: 'booking'
+    });
+
+    return rescheduledBooking;
   }
 };
 
@@ -263,6 +296,23 @@ export const cancelBooking = async (id: string, reason?: string) => {
       status: "cancelled",
       notes: (localBookings[index].notes || "") + `\nCancelled: ${reason}`
     };
-    return localBookings[index];
+
+    const cancelledBooking = localBookings[index];
+    const { useNotificationStore } = await import("@/stores/notificationStore");
+    const resName = cancelledBooking.resource?.name || cancelledBooking.title || "Shared Resource";
+    useNotificationStore.getState().addNotification({
+      title: 'Booking Cancelled',
+      message: `Your booking for "${resName}" has been cancelled.`,
+      type: 'error',
+      link: '/bookings'
+    });
+    useNotificationStore.getState().addActivity({
+      action: 'Booking Cancelled',
+      description: `Cancelled booking for "${resName}"`,
+      user: cancelledBooking.bookedBy?.name || 'System User',
+      type: 'booking'
+    });
+
+    return cancelledBooking;
   }
 };

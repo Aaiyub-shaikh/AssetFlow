@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Asset, MaintenanceRecord, Priority, AssetStatus, MaintenanceStatus } from '@/types'
 import { assets as mockAssets, maintenanceRecords as mockMaintenanceRecords } from '@/data/mock'
+import { useNotificationStore } from './notificationStore'
+import { useAuthStore } from './index'
 
 interface AssetMaintenanceState {
   assets: Asset[]
@@ -50,6 +52,20 @@ export const useAssetMaintenanceStore = create<AssetMaintenanceState>()(
         set({
           maintenanceRecords: [newRecord, ...maintenanceRecords],
         })
+
+        const activeUser = useAuthStore.getState().user?.name ?? 'System'
+        useNotificationStore.getState().addNotification({
+          title: 'Maintenance Requested',
+          message: `Maintenance request raised for "${asset.name}" (${asset.tag}).`,
+          type: 'info',
+          link: `/maintenance`
+        })
+        useNotificationStore.getState().addActivity({
+          action: 'Maintenance Requested',
+          description: `Maintenance request raised for "${asset.name}" (${asset.tag})`,
+          user: activeUser,
+          type: 'maintenance'
+        })
       },
 
       approveRequest: (id) => {
@@ -76,10 +92,27 @@ export const useAssetMaintenanceStore = create<AssetMaintenanceState>()(
           maintenanceRecords: updatedRecords,
           assets: updatedAssets,
         })
+
+        if (record) {
+          const activeUser = useAuthStore.getState().user?.name ?? 'System'
+          useNotificationStore.getState().addNotification({
+            title: 'Maintenance Approved',
+            message: `Maintenance request for "${record.assetName}" (${record.assetTag}) has been approved.`,
+            type: 'success',
+            link: `/maintenance`
+          })
+          useNotificationStore.getState().addActivity({
+            action: 'Maintenance Approved',
+            description: `Maintenance request for "${record.assetName}" approved`,
+            user: activeUser,
+            type: 'maintenance'
+          })
+        }
       },
 
       rejectRequest: (id) => {
         const { maintenanceRecords } = get()
+        const record = maintenanceRecords.find((rec) => rec.id === id)
         const updatedRecords = maintenanceRecords.map((rec) => {
           if (rec.id === id) {
             return { ...rec, status: 'rejected' as MaintenanceStatus }
@@ -90,6 +123,22 @@ export const useAssetMaintenanceStore = create<AssetMaintenanceState>()(
         set({
           maintenanceRecords: updatedRecords,
         })
+
+        if (record) {
+          const activeUser = useAuthStore.getState().user?.name ?? 'System'
+          useNotificationStore.getState().addNotification({
+            title: 'Maintenance Rejected',
+            message: `Maintenance request for "${record.assetName}" (${record.assetTag}) has been rejected.`,
+            type: 'error',
+            link: `/maintenance`
+          })
+          useNotificationStore.getState().addActivity({
+            action: 'Maintenance Rejected',
+            description: `Maintenance request for "${record.assetName}" rejected`,
+            user: activeUser,
+            type: 'maintenance'
+          })
+        }
       },
 
       assignTechnician: (id, technicianName) => {
@@ -169,6 +218,20 @@ export const useAssetMaintenanceStore = create<AssetMaintenanceState>()(
         set({
           maintenanceRecords: updatedRecords,
           assets: updatedAssets,
+        })
+
+        const activeUser = useAuthStore.getState().user?.name ?? 'System'
+        useNotificationStore.getState().addNotification({
+          title: 'Maintenance Resolved',
+          message: `Maintenance for "${record.assetName}" (${record.assetTag}) resolved.`,
+          type: 'success',
+          link: `/maintenance`
+        })
+        useNotificationStore.getState().addActivity({
+          action: 'Maintenance Completed',
+          description: `Maintenance resolved for "${record.assetName}"`,
+          user: activeUser,
+          type: 'maintenance'
         })
       },
 

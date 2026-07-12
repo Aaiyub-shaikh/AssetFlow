@@ -212,6 +212,12 @@ export async function updateAuditEntry(id: string, entryId: string, input: Updat
   const cycleIndex = auditCycles.findIndex((cycle) => cycle.id === id)
   if (cycleIndex === -1) return undefined
 
+  const cycle = auditCycles[cycleIndex]
+  const entryIndex = cycle.entries.findIndex((entry) => entry.id === entryId)
+  if (entryIndex === -1) return undefined
+
+  const entry = cycle.entries[entryIndex]
+
   auditCycles[cycleIndex] = {
     ...auditCycles[cycleIndex],
     entries: auditCycles[cycleIndex].entries.map((entry) =>
@@ -225,6 +231,23 @@ export async function updateAuditEntry(id: string, entryId: string, input: Updat
         : entry
     ),
     updatedAt: new Date().toISOString(),
+  }
+
+  // Flag discrepancy if status is Missing or Damaged
+  if (input.verificationStatus === 'Missing' || input.verificationStatus === 'Damaged') {
+    const { useNotificationStore } = await import('@/stores/notificationStore')
+    useNotificationStore.getState().addNotification({
+      title: 'Audit Discrepancy Flagged',
+      message: `Audit cycle "${cycle.name}" flagged a discrepancy for "${entry.assetName}" (${entry.assetTag}) as ${input.verificationStatus}.`,
+      type: 'warning',
+      link: `/audits`
+    })
+    useNotificationStore.getState().addActivity({
+      action: 'Audit Discrepancy Flagged',
+      description: `Asset "${entry.assetName}" marked as ${input.verificationStatus} in "${cycle.name}"`,
+      user: 'System User',
+      type: 'audit'
+    })
   }
 
   return clone(auditCycles[cycleIndex])
