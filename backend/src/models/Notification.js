@@ -1,11 +1,9 @@
-const mongoose = require('mongoose');
-const { NOTIFICATION_TYPE } = require('../constants');
+import mongoose from 'mongoose';
 
 const notificationSchema = new mongoose.Schema(
   {
-    recipient: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+    user: {
+      type: String,
       required: true,
       index: true,
     },
@@ -21,34 +19,36 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: Object.values(NOTIFICATION_TYPE),
-      default: NOTIFICATION_TYPE.INFO,
+      enum: [
+        'Asset Assigned',
+        'Maintenance Approved',
+        'Maintenance Rejected',
+        'Booking Confirmed',
+        'Booking Cancelled',
+        'Booking Reminder',
+        'Transfer Approved',
+        'Overdue Return',
+        'Audit Discrepancy',
+      ],
+      required: true,
+      index: true,
     },
-    read: {
+    priority: {
+      type: String,
+      enum: ['Low', 'Medium', 'High'],
+      default: 'Medium',
+    },
+    isRead: {
       type: Boolean,
       default: false,
       index: true,
-    },
-    link: {
-      type: String,
-      default: null,
-    },
-    entityType: {
-      type: String,
-      default: null,
-    },
-    entityId: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null,
-    },
-    metadata: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {},
     },
   },
   { timestamps: true }
 );
 
-notificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
+notificationSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+const Notification = mongoose.model('Notification', notificationSchema);
+
+export default Notification;

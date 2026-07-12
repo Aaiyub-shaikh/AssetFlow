@@ -1,15 +1,12 @@
-const { Router } = require('express');
-const notificationController = require('../controllers/notification.controller');
-const { protect } = require('../middleware/auth');
-const validate = require('../middleware/validate');
-const { mongoIdParam, paginationQuery } = require('../validators/auth.validator');
+import express from 'express';
+import { createNotification, deleteNotification, getNotifications, markAllAsRead, markAsRead } from '../controllers/notificationController.js';
 
-const router = Router();
+const router = express.Router();
 
-router.use(protect);
+router.get('/', getNotifications);
+router.post('/', createNotification);
+router.patch('/:id/read', markAsRead);
+router.patch('/read-all', markAllAsRead);
+router.delete('/:id', deleteNotification);
 
-router.get('/', paginationQuery, validate, notificationController.getNotifications);
-router.patch('/:id/read', mongoIdParam(), validate, notificationController.markAsRead);
-router.patch('/read-all', notificationController.markAllAsRead);
-
-module.exports = router;
+export default router;

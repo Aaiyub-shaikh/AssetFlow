@@ -1,28 +1,24 @@
-const mongoose = require('mongoose');
-const { ACTIVITY_ACTIONS } = require('../constants');
+import mongoose from 'mongoose';
 
 const activityLogSchema = new mongoose.Schema(
   {
     user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,
+      required: true,
+      index: true,
+    },
+    role: {
+      type: String,
+      required: true,
+    },
+    module: {
+      type: String,
       required: true,
       index: true,
     },
     action: {
       type: String,
-      enum: Object.values(ACTIVITY_ACTIONS),
       required: true,
-      index: true,
-    },
-    entity: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    entityId: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null,
       index: true,
     },
     description: {
@@ -30,19 +26,7 @@ const activityLogSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    oldValue: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
-    newValue: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
     ipAddress: {
-      type: String,
-      default: null,
-    },
-    userAgent: {
       type: String,
       default: null,
     },
@@ -51,6 +35,7 @@ const activityLogSchema = new mongoose.Schema(
 );
 
 activityLogSchema.index({ createdAt: -1 });
-activityLogSchema.index({ entity: 1, entityId: 1 });
 
-module.exports = mongoose.model('ActivityLog', activityLogSchema);
+const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
+
+export default ActivityLog;
