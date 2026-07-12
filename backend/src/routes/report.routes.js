@@ -1,14 +1,22 @@
-const { Router } = require('express');
-const reportController = require('../controllers/report.controller');
-const { protect } = require('../middleware/auth');
-const { authorize } = require('../middleware/rbac');
+import express from 'express';
+import {
+  getDashboardReport,
+  getUtilizationReport,
+  getDepartmentReport,
+  getMaintenanceReport,
+  getRetirementReport,
+  getBookingReport,
+  exportReport,
+} from '../controllers/reportsController.js';
 
-const router = Router();
+const router = express.Router();
 
-router.use(protect);
+router.get('/dashboard', getDashboardReport);
+router.get('/utilization', getUtilizationReport);
+router.get('/department', getDepartmentReport);
+router.get('/maintenance', getMaintenanceReport);
+router.get('/retirement', getRetirementReport);
+router.get('/bookings', getBookingReport);
+router.get('/export', exportReport);
 
-router.get('/dashboard', authorize('reports:*', 'reports:read_dept'), reportController.getDashboard);
-router.get('/dashboard/me', reportController.getUserDashboard);
-router.get('/:type', authorize('reports:*', 'reports:read_dept'), reportController.getReport);
-
-module.exports = router;
+export default router;

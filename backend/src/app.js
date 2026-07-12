@@ -4,16 +4,13 @@ import cors from "cors";
 import auditRoutes from "./routes/audits.js";
 import bookingRoutes from "./routes/bookings.js";
 import resourceRoutes from "./routes/resources.js";
+import reportRoutes from "./routes/report.routes.js";
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Routes
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/resources", resourceRoutes);
 
 // Health Check Route
 app.get("/", (req, res) => {
@@ -29,5 +26,11 @@ app.get("/api/health", (req, res) => {
     message: "Server is healthy",
   });
 });
+
+// API Routes
+app.use("/api/audits", auditRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/resources", resourceRoutes);
+app.use("/api/reports", reportRoutes);
 
 export default app;
