@@ -4,7 +4,7 @@ export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed'
 export type MaintenanceStatus = 'scheduled' | 'in_progress' | 'completed' | 'overdue'
 export type AuditStatus = 'planned' | 'in_progress' | 'completed' | 'overdue'
 export type Priority = 'low' | 'medium' | 'high' | 'critical'
-export type UserRole = 'admin' | 'manager' | 'employee'
+export type UserRole = 'admin' | 'manager' | 'department_head' | 'employee'
 
 export interface User {
   id: string
@@ -16,6 +16,7 @@ export interface User {
   position: string
   phone?: string
   joinedAt: string
+  status?: 'active' | 'inactive'
 }
 
 export interface Organization {
@@ -41,6 +42,7 @@ export interface Department {
   budget: number
   location: string
   createdAt: string
+  isActive?: boolean
 }
 
 export interface Category {
@@ -52,6 +54,7 @@ export interface Category {
   depreciationRate: number
   warrantyPeriod: number
   icon: string
+  isActive?: boolean
 }
 
 export interface Asset {

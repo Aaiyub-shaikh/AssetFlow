@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import * as Icons from 'lucide-react'
 import { ChevronLeft, ChevronRight, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useUIStore } from '@/stores'
-import { footerNavItems, isNavItemActive, navigationGroups } from '@/config/navigation'
+import { useUIStore, useAuthStore } from '@/stores'
+import { getFooterNavItems, getNavigationGroups, isNavItemActive } from '@/config/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 function NavLink({
@@ -37,7 +37,7 @@ function NavLink({
         collapsed && 'justify-center px-2'
       )}
     >
-      <Icon className={cn('h-[18px] w-[18px] shrink-0', isActive && 'text-primary')} />
+      <Icon className={cn('h-4.5 w-4.5 shrink-0', isActive && 'text-primary')} />
       {!collapsed && <span className="truncate">{title}</span>}
       {isActive && !collapsed && (
         <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
@@ -55,6 +55,10 @@ function SidebarPanel({
   onNavigate: () => void
   onToggle: () => void
 }) {
+  const user = useAuthStore((s) => s.user)
+  const navigationGroups = getNavigationGroups(user?.role)
+  const footerNavItems = getFooterNavItems(user?.role)
+
   return (
     <div className="flex h-full flex-col">
       <div

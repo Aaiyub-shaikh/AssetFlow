@@ -1,76 +1,69 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
+const { BOOKING_STATUS } = require('../constants');
 
 const bookingSchema = new mongoose.Schema(
   {
-    resource: {
+    asset: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Resource",
-      required: [true, "Resource is required"]
-    },
-    title: {
-      type: String,
-      required: [true, "Booking title is required"],
-      trim: true
-    },
-    description: {
-      type: String,
-      trim: true
+      ref: 'Asset',
+      required: true,
+      index: true,
     },
     bookedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+      ref: 'User',
+      required: true,
+      index: true,
     },
-    attendees: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
-      }
-    ],
-    startTime: {
-      type: Date,
-      required: [true, "Start time is required"]
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+      required: true,
     },
-    endTime: {
+    startDate: {
       type: Date,
-      required: [true, "End time is required"],
-      validate: {
-        validator: function (value) {
-          return value > this.startTime;
-        },
-        message: "End time must be after start time"
-      }
+      required: [true, 'Start date is required'],
+      index: true,
+    },
+    endDate: {
+      type: Date,
+      required: [true, 'End date is required'],
+      index: true,
     },
     status: {
       type: String,
-      enum: ["upcoming", "ongoing", "completed", "cancelled"],
-      default: "upcoming"
+      enum: Object.values(BOOKING_STATUS),
+      default: BOOKING_STATUS.PENDING,
+      index: true,
+    },
+    purpose: {
+      type: String,
+      required: [true, 'Purpose is required'],
+      trim: true,
+    },
+    location: {
+      type: String,
+      trim: true,
+      default: '',
     },
     reminderSent: {
       type: Boolean,
-      default: false
+      default: false,
     },
-    reminderTime: {
-      type: Number,
-      default: 15 // minutes before booking
+    cancelledAt: {
+      type: Date,
+      default: null,
     },
-    notes: String,
-    isCancellationAllowed: {
-      type: Boolean,
-      default: true
-    },
-    cancellationReason: String,
-    rescheduledFrom: {
+    cancelledBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking"
-    }
+      ref: 'User',
+      default: null,
+    },
   },
   { timestamps: true }
 );
 
-// Index for efficient overlap queries
-bookingSchema.index({ resource: 1, startTime: 1, endTime: 1 });
-bookingSchema.index({ bookedBy: 1, createdAt: -1 });
-bookingSchema.index({ status: 1 });
+bookingSchema.index({ asset: 1, startDate: 1, endDate: 1 });
+bookingSchema.index({ bookedBy: 1, status: 1 });
 
-export default mongoose.model("Booking", bookingSchema);
+module.exports = mongoose.model('Booking', bookingSchema);

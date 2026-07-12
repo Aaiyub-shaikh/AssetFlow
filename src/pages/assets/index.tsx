@@ -7,6 +7,7 @@ import { DataTable } from '@/components/shared/data-table'
 import { StatusChip } from '@/components/shared/status-chip'
 import { assets } from '@/data/mock'
 import { formatCurrency } from '@/lib/utils'
+import { useAuthStore } from '@/stores'
 import type { Asset } from '@/types'
 
 const columns: ColumnDef<Asset, unknown>[] = [
@@ -30,12 +31,17 @@ const columns: ColumnDef<Asset, unknown>[] = [
 ]
 
 export function AssetsPage() {
+  const user = useAuthStore((s) => s.user)
+  const canRegisterAsset = user?.role === 'manager'
+
   return (
     <div className="space-y-6">
       <PageHeader description="Browse and manage all organizational assets">
-        <Link to="/assets/register">
-          <Button><Plus className="h-4 w-4" /> Register Asset</Button>
-        </Link>
+        {canRegisterAsset ? (
+          <Link to="/assets/register">
+            <Button><Plus className="h-4 w-4" /> Register Asset</Button>
+          </Link>
+        ) : null}
       </PageHeader>
       <DataTable columns={columns} data={assets} searchKey="name" searchPlaceholder="Search assets..." />
     </div>

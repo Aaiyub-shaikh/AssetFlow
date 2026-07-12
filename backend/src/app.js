@@ -24,8 +24,5 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// API Routes
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/resources", resourceRoutes);
-
 export default app;
+>>>>>>> main
