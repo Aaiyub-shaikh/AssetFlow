@@ -1,84 +1,117 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { type ColumnDef } from '@tanstack/react-table'
-import { Plus, Calendar, List } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { PageHeader } from '@/components/shared/page-header'
-import { DataTable } from '@/components/shared/data-table'
-import { StatusChip } from '@/components/shared/status-chip'
-import { bookings } from '@/data/mock'
-import { formatDate } from '@/lib/utils'
-import type { Booking } from '@/types'
-
-const columns: ColumnDef<Booking, unknown>[] = [
-  { accessorKey: 'assetName', header: 'Asset', cell: ({ row }) => (
-    <div>
-      <p className="font-medium">{row.original.assetName}</p>
-      <p className="text-xs text-muted-foreground font-mono">{row.original.assetTag}</p>
-    </div>
-  )},
-  { accessorKey: 'bookedBy', header: 'Booked By' },
-  { accessorKey: 'department', header: 'Department' },
-  { accessorKey: 'startDate', header: 'Start', cell: ({ getValue }) => formatDate(getValue<string>()) },
-  { accessorKey: 'endDate', header: 'End', cell: ({ getValue }) => formatDate(getValue<string>()) },
-  { accessorKey: 'purpose', header: 'Purpose' },
-  { accessorKey: 'status', header: 'Status', cell: ({ getValue }) => <StatusChip status={getValue<string>()} /> },
-]
-
-const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+import { useState } from "react";
+import { PageShell } from "@/components/layout/page-shell";
+import { PageHeader } from "@/components/shared/page-header";
+import { useResources, useBookings, useCreateBooking, useCancelBooking, useRescheduleBooking } from "@/hooks/useBooking";
+import { BookingFormDialog } from "@/components/bookings/booking-form-dialog";
+import { BookingList } from "@/components/bookings/booking-list";
+import { BookingCalendar } from "@/components/bookings/booking-calendar";
+import { CancelDialog } from "@/components/bookings/cancel-dialog";
+import { RescheduleDialog } from "@/components/bookings/reschedule-dialog";
+import { Booking } from "@/types/booking";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function BookingsPage() {
-  const [view, setView] = useState<'list' | 'calendar'>('list')
+  const [formOpen, setFormOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedBookingForCancel, setSelectedBookingForCancel] = useState<Booking | null>(null);
+  const [selectedBookingForReschedule, setSelectedBookingForReschedule] = useState<Booking | null>(null);
+
+  const { data: resources = [] } = useResources();
+  const { data: bookings = [], isLoading: bookingsLoading } = useBookings();
+
+  const createBooking = useCreateBooking();
+  const cancelBooking = useCancelBooking();
+  const rescheduleBooking = useRescheduleBooking();
+
+  const handleCreateBooking = async (data: any) => {
+    await createBooking.mutateAsync(data);
+  };
+
+  const handleCancelBooking = async (reason: string) => {
+    if (!selectedBookingForCancel) return;
+    await cancelBooking.mutateAsync({
+      id: selectedBookingForCancel._id,
+      reason
+    });
+    setSelectedBookingForCancel(null);
+  };
+
+  const handleRescheduleBooking = async (newStartTime: string, newEndTime: string, reason: string) => {
+    if (!selectedBookingForReschedule) return;
+    await rescheduleBooking.mutateAsync({
+      id: selectedBookingForReschedule._id,
+      newStartTime,
+      newEndTime,
+      reason
+    });
+    setSelectedBookingForReschedule(null);
+  };
 
   return (
-    <div className="space-y-6">
-      <PageHeader description="Reserve and manage asset bookings">
-        <div className="flex gap-2">
-          <Button variant={view === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setView('list')}>
-            <List className="h-4 w-4" /> List
-          </Button>
-          <Button variant={view === 'calendar' ? 'default' : 'outline'} size="sm" onClick={() => setView('calendar')}>
-            <Calendar className="h-4 w-4" /> Calendar
-          </Button>
-          <Button><Plus className="h-4 w-4" /> New Booking</Button>
-        </div>
-      </PageHeader>
+    <PageShell>
+      <PageHeader
+        title="Resource Bookings"
+        description="Book and manage shared resources with real-time availability"
+      />
 
-      {view === 'list' ? (
-        <DataTable columns={columns} data={bookings} searchKey="assetName" searchPlaceholder="Search bookings..." />
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {weekDays.map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">{day}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: 35 }).map((_, i) => {
-                const dayBookings = bookings.filter((_, bi) => bi % 7 === i % 7)
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.01 }}
-                    className="min-h-[80px] p-2 rounded-xl border border-border hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-xs text-muted-foreground">{(i % 31) + 1}</span>
-                    {dayBookings.slice(0, 2).map((b) => (
-                      <div key={b.id} className="mt-1 px-1.5 py-0.5 rounded text-[10px] bg-primary/15 text-primary truncate">
-                        {b.assetTag}
-                      </div>
-                    ))}
-                  </motion.div>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-6">
+        <Tabs defaultValue="list" className="w-full">
+          <TabsList>
+            <TabsTrigger value="list">Bookings List</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="space-y-4">
+            <BookingList
+              bookings={bookings}
+              isLoading={bookingsLoading}
+              onCreateNew={() => setFormOpen(true)}
+              onCancel={setSelectedBookingForCancel}
+              onReschedule={setSelectedBookingForReschedule}
+              isActionLoading={cancelBooking.isPending || rescheduleBooking.isPending}
+            />
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-4">
+            <BookingCalendar
+              bookings={bookings}
+              currentMonth={currentMonth}
+              onMonthChange={setCurrentMonth}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Booking Form Dialog */}
+      <BookingFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        resources={resources}
+        onSubmit={handleCreateBooking}
+        isLoading={createBooking.isPending}
+      />
+
+      {/* Cancel Dialog */}
+      {selectedBookingForCancel && (
+        <CancelDialog
+          booking={selectedBookingForCancel}
+          open={!!selectedBookingForCancel}
+          onOpenChange={(open) => !open && setSelectedBookingForCancel(null)}
+          onCancel={handleCancelBooking}
+          isLoading={cancelBooking.isPending}
+        />
       )}
-    </div>
-  )
+
+      {/* Reschedule Dialog */}
+      {selectedBookingForReschedule && (
+        <RescheduleDialog
+          booking={selectedBookingForReschedule}
+          open={!!selectedBookingForReschedule}
+          onOpenChange={(open) => !open && setSelectedBookingForReschedule(null)}
+          onReschedule={handleRescheduleBooking}
+          isLoading={rescheduleBooking.isPending}
+        />
+      )}
+    </PageShell>
+  );
 }
