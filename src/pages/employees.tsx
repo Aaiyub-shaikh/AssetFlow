@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/shared/page-header'
 import { DataTable } from '@/components/shared/data-table'
 import { useAuthStore } from '@/stores'
 import { formatDate } from '@/lib/utils'
+import { ROLE_LABELS, ROLE_POSITION_DEFAULTS, MANAGEABLE_ROLES } from '@/lib/rbac'
 import type { User, UserRole } from '@/types'
 import {
   Dialog,
@@ -57,17 +58,13 @@ export function EmployeesPage() {
   const handleRoleChangeForNew = (val: string) => {
     const role = val as UserRole
     setNewRole(role)
-    if (role === 'admin') setNewPosition('Asset Manager')
-    else if (role === 'manager') setNewPosition('Department Head')
-    else setNewPosition('Employee')
+    setNewPosition(ROLE_POSITION_DEFAULTS[role])
   }
 
   const handleRoleChangeForEdit = (val: string) => {
     const role = val as UserRole
     setEditRole(role)
-    if (role === 'admin') setEditPosition('Asset Manager')
-    else if (role === 'manager') setEditPosition('Department Head')
-    else setEditPosition('Employee')
+    setEditPosition(ROLE_POSITION_DEFAULTS[role])
   }
 
   const handleCreateEmployee = (e: React.FormEvent) => {
@@ -135,10 +132,9 @@ export function EmployeesPage() {
       accessorKey: 'role',
       header: 'Role',
       cell: ({ getValue }) => {
-        const role = getValue<string>()
+        const role = getValue<UserRole>()
         let variant: 'default' | 'warning' | 'secondary' = 'secondary'
         let Icon = Shield
-        let style = 'gap-1'
 
         if (role === 'admin') {
           variant = 'default'
@@ -146,12 +142,15 @@ export function EmployeesPage() {
         } else if (role === 'manager') {
           variant = 'warning'
           Icon = ShieldCheck
+        } else if (role === 'department_head') {
+          variant = 'secondary'
+          Icon = UserCog
         }
 
         return (
-          <Badge variant={variant} className={`${style} capitalize`}>
+          <Badge variant={variant} className="gap-1">
             <Icon className="h-3 w-3 shrink-0" />
-            {role}
+            {ROLE_LABELS[role] || role}
           </Badge>
         )
       },
@@ -261,9 +260,11 @@ export function EmployeesPage() {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    {MANAGEABLE_ROLES.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {ROLE_LABELS[role]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -341,9 +342,11 @@ export function EmployeesPage() {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="employee">Employee (Self-Service)</SelectItem>
-                    <SelectItem value="manager">Manager (Department Head)</SelectItem>
-                    <SelectItem value="admin">Admin (Asset Manager / Full Control)</SelectItem>
+                    {MANAGEABLE_ROLES.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {ROLE_LABELS[role]}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

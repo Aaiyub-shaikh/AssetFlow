@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, UserCheck, Wrench, Calendar } from 'lucide-react'
+import { AlertTriangle, Calendar, CalendarClock, Plus, RotateCcw, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatCard } from '@/components/shared/stat-card'
@@ -8,33 +8,148 @@ import { UtilizationChart, DepartmentChart, BookingHeatmapChart, MaintenanceTren
 import { ActivityFeed } from '@/components/shared/activity-feed'
 import { PageShell } from '@/components/layout/page-shell'
 import {
-  dashboardKPIs, utilizationData, departmentAllocationData,
-  bookingHeatmapData, maintenanceTrendData, activities, notifications
+  utilizationData, departmentAllocationData,
+  bookingHeatmapData, maintenanceTrendData, activities, notifications,
+  assets, allocations, bookings, transfers, maintenanceRecords, currentUser
 } from '@/data/mock'
-import { formatRelativeTime } from '@/lib/utils'
+import { formatDate, formatRelativeTime } from '@/lib/utils'
+import { useAuthStore } from '@/stores'
 
 export function DashboardPage() {
+  const user = useAuthStore((s) => s.user)
+  const today = new Date()
+  const todayKey = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+  const availableAssets = assets.filter((asset) => asset.status === 'available').length
+  const allocatedAssets = assets.filter((asset) => asset.status === 'allocated').length
+  const maintenanceToday = maintenanceRecords.filter((record) => {
+    const scheduled = new Date(record.scheduledDate)
+    return record.status !== 'completed' && scheduled.getFullYear() === today.getFullYear() && scheduled.getMonth() === today.getMonth() && scheduled.getDate() === today.getDate()
+  }).length
+  const activeBookings = bookings.filter((booking) => ['confirmed', 'pending'].includes(booking.status)).length
+  const pendingTransfers = transfers.filter((transfer) => transfer.status === 'pending').length
+
+  const returnItems = allocations
+    .filter((allocation) => allocation.status === 'active' && allocation.returnDate)
+    .map((allocation) => ({ ...allocation, returnDateValue: new Date(allocation.returnDate as string) }))
+
+  const overdueReturns = returnItems.filter((item) => item.returnDateValue < todayKey)
+  const upcomingReturns = returnItems.filter((item) => item.returnDateValue >= todayKey)
+
+  const kpis = [
+    { label: 'Assets Available', value: availableAssets, change: 12, trend: 'up' as const, icon: 'Package' },
+    { label: 'Assets Allocated', value: allocatedAssets, change: 8, trend: 'up' as const, icon: 'UserCheck' },
+    { label: 'Maintenance Today', value: maintenanceToday, change: 2, trend: 'up' as const, icon: 'Wrench' },
+    { label: 'Active Bookings', value: activeBookings, change: 15, trend: 'up' as const, icon: 'Calendar' },
+    { label: 'Pending Transfers', value: pendingTransfers, change: -5, trend: 'down' as const, icon: 'ArrowLeftRight' },
+    { label: 'Upcoming Returns', value: upcomingReturns.length, change: 0, trend: 'neutral' as const, icon: 'RotateCcw' },
+  ]
+
+  const canRegisterAsset = user?.role === 'manager'
+  const canBookResource = ['manager', 'department_head', 'employee'].includes(user?.role ?? '')
+  const canRaiseMaintenance = ['manager', 'employee'].includes(user?.role ?? '')
+
   const quickActions = [
-    { label: 'Register Asset', icon: Plus, href: '/assets/register', color: 'bg-primary/10 text-primary' },
-    { label: 'New Allocation', icon: UserCheck, href: '/allocation', color: 'bg-success/10 text-success' },
-    { label: 'Schedule Maintenance', icon: Wrench, href: '/maintenance', color: 'bg-warning/10 text-warning' },
-    { label: 'Book Asset', icon: Calendar, href: '/bookings', color: 'bg-primary/10 text-primary' },
+    ...(canRegisterAsset ? [{ label: 'Register Asset', icon: Plus, href: '/assets/register', color: 'bg-primary/10 text-primary' }] : []),
+    ...(canBookResource ? [{ label: 'Book Resource', icon: Calendar, href: '/bookings', color: 'bg-success/10 text-success' }] : []),
+    ...(canRaiseMaintenance ? [{ label: 'Raise Maintenance Request', icon: Wrench, href: '/maintenance', color: 'bg-warning/10 text-warning' }] : []),
   ]
 
   return (
     <PageShell
-      description="Welcome back! Here's an overview of your asset management."
+      description={`Welcome back, ${currentUser.name.split(' ')[0]}! Here’s a real-time view of your operations.`}
       actions={
-        <Link to="/assets/register">
-          <Button><Plus className="h-4 w-4" /> Register Asset</Button>
-        </Link>
+        canRegisterAsset ? (
+          <Link to="/assets/register">
+            <Button><Plus className="h-4 w-4" /> Register Asset</Button>
+          </Link>
+        ) : null
       }
     >
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {dashboardKPIs.map((kpi, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        {kpis.map((kpi, i) => (
           <StatCard key={kpi.label} kpi={kpi} index={i} />
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Card className="xl:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-base">Returns Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-xl border border-danger/20 bg-danger/5 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-danger">
+                <AlertTriangle className="h-4 w-4" />
+                Overdue returns
+              </div>
+              {overdueReturns.length > 0 ? (
+                <div className="space-y-2">
+                  {overdueReturns.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-danger/20 bg-background/60 px-3 py-2">
+                      <div>
+                        <p className="text-sm font-medium">{item.assetName}</p>
+                        <p className="text-xs text-muted-foreground">{item.employeeName} • Due {formatDate(item.returnDateValue)}</p>
+                      </div>
+                      <span className="text-xs font-semibold text-danger">Overdue</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No overdue returns right now.</p>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-background/40 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                <CalendarClock className="h-4 w-4" />
+                Upcoming returns
+              </div>
+              {upcomingReturns.length > 0 ? (
+                <div className="space-y-2">
+                  {upcomingReturns.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-border/70 bg-background/70 px-3 py-2">
+                      <div>
+                        <p className="text-sm font-medium">{item.assetName}</p>
+                        <p className="text-xs text-muted-foreground">{item.employeeName} • Due {formatDate(item.returnDateValue)}</p>
+                      </div>
+                      <span className="text-xs font-medium text-muted-foreground">Scheduled</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No upcoming returns scheduled.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            {quickActions.map((action, i) => (
+              <Link key={action.label} to={action.href}>
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 transition-all hover:-translate-y-0.5 hover:bg-white/5"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.color}`}>
+                      <action.icon className="h-5 w-5" />
+                    </div>
+                    <span className="text-sm font-medium">{action.label}</span>
+                  </div>
+                  <RotateCcw className="h-4 w-4 text-muted-foreground" />
+                </motion.div>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

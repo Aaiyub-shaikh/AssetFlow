@@ -82,8 +82,4 @@ src/
 - **Real-Time Dashboard** — KPIs, charts, and activity feeds
 - **Reports & Analytics** — Generate comprehensive asset reports
 
-## 📄 License
-
-This project is proprietary software by SRB Tech.
-
 

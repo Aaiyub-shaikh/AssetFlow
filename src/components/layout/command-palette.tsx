@@ -3,18 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ArrowRight } from 'lucide-react'
 import * as Icons from 'lucide-react'
-import { useUIStore } from '@/stores'
-import { getAllNavItems, navigationGroups } from '@/config/navigation'
+import { useUIStore, useAuthStore } from '@/stores'
+import { getAllNavItems, getNavigationGroups } from '@/config/navigation'
 import { cn } from '@/lib/utils'
 
 export function CommandPalette() {
   const navigate = useNavigate()
   const { commandPaletteOpen, setCommandPaletteOpen } = useUIStore()
+  const user = useAuthStore((s) => s.user)
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const allItems = getAllNavItems().map((item) => {
-    const group = navigationGroups.find((g) => g.items.some((i) => i.href === item.href))
+  const allItems = getAllNavItems(user?.role).map((item) => {
+    const group = getNavigationGroups(user?.role).find((g) => g.items.some((i) => i.href === item.href))
     return { ...item, group: group?.label ?? 'System' }
   })
 
