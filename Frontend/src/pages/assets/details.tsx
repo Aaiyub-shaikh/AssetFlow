@@ -7,12 +7,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StatusChip } from '@/components/shared/status-chip'
 import { QRDisplay } from '@/components/shared/qr-display'
 import { Timeline } from '@/components/shared/activity-feed'
-import { assets, assetTimeline } from '@/data/mock'
+import { api } from '@/lib/api'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { useQuery } from '@tanstack/react-query'
+import type { TimelineEvent } from '@/types'
 
 export function AssetDetailsPage() {
   const { id } = useParams()
-  const asset = assets.find((a) => a.id === id) || assets[0]
+  
+  const { data: asset, isLoading, error } = useQuery({
+    queryKey: ['asset', id],
+    queryFn: () => api.getAssetDetails(id || ''),
+    enabled: !!id,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <p className="text-muted-foreground">Loading asset details...</p>
+      </div>
+    )
+  }
+
+  if (error || !asset) {
+    return (
+      <div className="flex h-[400px] items-center justify-center text-danger">
+        <p>Error: {error ? (error as Error).message : 'Asset not found'}</p>
+      </div>
+    )
+  }
+
+  // Construct dynamic timeline events based on real allocation and transfer history
+  const historyEvents: TimelineEvent[] = []
+  if (asset.history) {
+    asset.history.allocations.forEach((alloc: any) => {
+      historyEvents.push({
+        id: alloc._id || alloc.id,
+        title: alloc.status === 'returned' ? 'Asset Returned' : 'Asset Allocated',
+        description: alloc.status === 'returned'
+          ? `Returned in ${alloc.conditionOnReturn || 'good'} condition`
+          : `Assigned to ${alloc.employeeName} (${alloc.department})`,
+        timestamp: alloc.allocatedAt,
+        type: 'allocation',
+        user: alloc.employeeName,
+      })
+    })
+
+    asset.history.transfers.forEach((trf: any) => {
+      historyEvents.push({
+        id: trf._id || trf.id,
+        title: `Transfer Request ${trf.status.toUpperCase()}`,
+        description: `Transfer from ${trf.fromDepartment} to ${trf.toDepartment}`,
+        timestamp: trf.requestedAt,
+        type: 'transfer',
+        user: trf.requestedBy,
+      })
+    })
+  }
+
+  // Sort events by timestamp descending (newest first)
+  historyEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
   const details = [
     { label: 'Serial Number', value: asset.serialNumber },
@@ -22,7 +76,7 @@ export function AssetDetailsPage() {
     { label: 'Purchase Date', value: formatDate(asset.purchaseDate) },
     { label: 'Purchase Price', value: formatCurrency(asset.purchasePrice) },
     { label: 'Current Value', value: formatCurrency(asset.currentValue) },
-    { label: 'Warranty Expiry', value: formatDate(asset.warrantyExpiry) },
+    { label: 'Warranty Expiry', value: asset.warrantyExpiry ? formatDate(asset.warrantyExpiry) : 'N/A' },
     { label: 'Assigned To', value: asset.assignedTo || 'Unassigned' },
     { label: 'Last Maintenance', value: asset.lastMaintenance ? formatDate(asset.lastMaintenance) : 'N/A' },
   ]
@@ -84,7 +138,7 @@ export function AssetDetailsPage() {
             <TabsContent value="timeline">
               <Card>
                 <CardHeader><CardTitle>Asset Timeline</CardTitle></CardHeader>
-                <CardContent><Timeline events={assetTimeline} /></CardContent>
+                <CardContent><Timeline events={historyEvents} /></CardContent>
               </Card>
             </TabsContent>
             <TabsContent value="maintenance">

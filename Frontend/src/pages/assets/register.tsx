@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageHeader } from '@/components/shared/page-header'
 import { categories, departments } from '@/data/mock'
 import toast from 'react-hot-toast'
+import { useMutation } from '@tanstack/react-query'
+import { api } from '@/lib/api'
+import type { Asset } from '@/types'
 
 const schema = z.object({
   name: z.string().min(2, 'Name is required'),
@@ -28,15 +31,48 @@ type FormData = z.infer<typeof schema>
 
 export function RegisterAssetPage() {
   const navigate = useNavigate()
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
+  const mutation = useMutation({
+    mutationFn: (newAsset: Omit<Asset, 'id' | 'qrCode' | 'currentValue'>) => api.registerAsset(newAsset),
+    onSuccess: (data) => {
+      toast.success(`Asset "${data.name}" registered successfully!`)
+      navigate('/assets')
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to register asset')
+    },
+  })
+
   const onSubmit = async (data: FormData) => {
-    await new Promise((r) => setTimeout(r, 1000))
-    toast.success(`Asset "${data.name}" registered successfully!`, { duration: 4000 })
-    navigate('/assets')
+    // Generate a tag in hackathon format: e.g. AF-LPT-309 or similar
+    const randomVal = Math.floor(100 + Math.random() * 900)
+    const tag = `AF-AST-${randomVal}`
+
+    const categoryObj = categories.find((c) => c.id === data.categoryId)
+    const departmentObj = departments.find((d) => d.id === data.departmentId)
+
+    mutation.mutate({
+      name: data.name,
+      tag,
+      serialNumber: data.serialNumber,
+      category: categoryObj ? categoryObj.name : 'Computers',
+      categoryId: data.categoryId,
+      department: departmentObj ? departmentObj.name : 'Engineering',
+      departmentId: data.departmentId,
+      purchaseDate: data.purchaseDate,
+      purchasePrice: data.purchasePrice,
+      location: data.location,
+      condition: 'good',
+      status: 'available',
+      notes: data.notes,
+      warrantyExpiry: '',
+    })
   }
+
+  const isSubmitting = mutation.isPending
 
   return (
     <div className="space-y-6">
