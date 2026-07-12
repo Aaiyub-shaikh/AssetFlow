@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AssetFlowBrand, AssetFlowLogo } from '@/components/auth/assetflow-logo'
 import { useAuthStore, DEMO_CREDENTIALS } from '@/stores'
+import { getDefaultRouteForRole, ROLE_LABELS } from '@/lib/rbac'
 import toast from 'react-hot-toast'
 
 const loginSchema = z.object({
@@ -101,7 +102,8 @@ export function LoginPage() {
       const success = await login(data.email, data.password)
       if (success) {
         toast.success('Logged in successfully!')
-        navigate('/dashboard')
+        const role = useAuthStore.getState().user?.role
+        navigate(getDefaultRouteForRole(role))
       } else {
         toast.error('Invalid email or password')
       }
@@ -120,7 +122,8 @@ export function LoginPage() {
       const success = await login(email, pass)
       if (success) {
         toast.success('Logged in with demo account!')
-        navigate('/dashboard')
+        const role = useAuthStore.getState().user?.role
+        navigate(getDefaultRouteForRole(role))
       } else {
         toast.error('Demo login failed')
       }
@@ -180,7 +183,7 @@ export function LoginPage() {
       </div>
 
       {/* Right side: Login form and demo credentials */}
-      <div className="relative z-10 flex items-center justify-center px-6 py-10 lg:px-12 lg:w-[480px] xl:w-[540px] shrink-0 bg-background/40 lg:border-l lg:border-border backdrop-blur-md">
+      <div className="relative z-10 flex items-center justify-center px-6 py-10 lg:px-12 lg:w-120 xl:w-135 shrink-0 bg-background/40 lg:border-l lg:border-border backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -204,7 +207,7 @@ export function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="name@company.com"
-                  className="pl-10 h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-primary/50 text-sm"
+                  className="pl-10 h-11 bg-white/3 border-white/10 rounded-xl focus:border-primary/50 text-sm"
                   {...register('email')}
                 />
               </div>
@@ -229,7 +232,7 @@ export function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
-                  className="pl-10 pr-10 h-11 bg-white/[0.03] border-white/10 rounded-xl focus:border-primary/50 text-sm"
+                  className="pl-10 pr-10 h-11 bg-white/3 border-white/10 rounded-xl focus:border-primary/50 text-sm"
                   {...register('password')}
                 />
                 <button
@@ -265,6 +268,13 @@ export function LoginPage() {
             </Button>
           </form>
 
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            New employee?{' '}
+            <Link to="/signup" className="font-medium text-primary hover:text-indigo-400 hover:underline">
+              Create an employee account
+            </Link>
+          </p>
+
           {/* Demo users section */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
@@ -272,7 +282,7 @@ export function LoginPage() {
             </div>
             <div className="relative flex justify-center">
               <span className="bg-[#0b0f19] px-3 text-[10px] font-medium tracking-wider text-muted-foreground uppercase">
-                Or Quick Login Demo
+                Demo Credentials
               </span>
             </div>
           </div>
@@ -287,6 +297,9 @@ export function LoginPage() {
               } else if (cred.user.role === 'manager') {
                 accentClass = 'border-blue-500/20 hover:border-blue-500/50 hover:bg-blue-500/5 text-blue-400'
                 Icon = Wrench
+              } else if (cred.user.role === 'department_head') {
+                accentClass = 'border-violet-500/20 hover:border-violet-500/50 hover:bg-violet-500/5 text-violet-400'
+                Icon = UserCheck
               } else {
                 accentClass = 'border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/5 text-amber-400'
                 Icon = Bookmark
@@ -297,14 +310,14 @@ export function LoginPage() {
                   key={cred.email}
                   type="button"
                   onClick={() => handleQuickLogin(cred.email, cred.password)}
-                  className={`flex items-center gap-3 w-full p-2.5 rounded-xl border bg-white/[0.01] hover:-translate-y-0.5 transition-all text-left group cursor-pointer ${accentClass}`}
+                  className={`flex items-center gap-3 w-full p-2.5 rounded-xl border bg-white/1 hover:-translate-y-0.5 transition-all text-left group cursor-pointer ${accentClass}`}
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 group-hover:bg-white/10">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-white flex items-center justify-between">
-                      {cred.user.role.charAt(0).toUpperCase() + cred.user.role.slice(1)} View
+                      {ROLE_LABELS[cred.user.role]} View
                       <span className="text-[9px] font-normal text-muted-foreground opacity-60 group-hover:opacity-100 transition-opacity">
                         {cred.password}
                       </span>
@@ -317,10 +330,7 @@ export function LoginPage() {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-8">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-primary font-medium hover:underline hover:text-indigo-400 transition-colors">
-              Sign up
-            </Link>
+            Use the demo credentials above to explore the available roles.
           </p>
         </motion.div>
       </div>

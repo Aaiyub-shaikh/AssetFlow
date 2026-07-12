@@ -1,0 +1,15 @@
+module.exports = {
+  User: require('./User'),
+  Department: require('./Department'),
+  AssetCategory: require('./AssetCategory'),
+  Asset: require('./Asset'),
+  AssetAllocation: require('./AssetAllocation'),
+  TransferRequest: require('./TransferRequest'),
+  Return: require('./Return'),
+  Booking: require('./Booking'),
+  MaintenanceRequest: require('./MaintenanceRequest'),
+  AuditCycle: require('./AuditCycle'),
+  AuditResult: require('./AuditResult'),
+  Notification: require('./Notification'),
+  ActivityLog: require('./ActivityLog'),
+};

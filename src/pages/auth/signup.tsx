@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AssetFlowBrand, AssetFlowLogo } from '@/components/auth/assetflow-logo'
 import { useAuthStore } from '@/stores'
 import { departments } from '@/data/mock'
+import { getDefaultRouteForRole } from '@/lib/rbac'
 import toast from 'react-hot-toast'
 
 const signupSchema = z
@@ -86,7 +87,7 @@ export function SignupPage() {
       })
       if (success) {
         toast.success('Welcome to AssetFlow!')
-        navigate('/dashboard')
+        navigate(getDefaultRouteForRole('employee'))
       }
     } catch {
       toast.error('An error occurred during registration')
