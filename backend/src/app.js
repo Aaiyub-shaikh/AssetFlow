@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import bookingRoutes from "./routes/bookings.js";
+import resourceRoutes from "./routes/resources.js";
 
 const app = express();
 
@@ -21,5 +23,9 @@ app.get("/api/health", (req, res) => {
     message: "Server is healthy"
   });
 });
+
+// API Routes
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/resources", resourceRoutes);
 
 export default app;
