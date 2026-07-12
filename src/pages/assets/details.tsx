@@ -251,7 +251,7 @@ export function AssetDetailsPage() {
                 <Package className="h-14 w-14 text-primary/60" />
               )}
             </div>
-            <QRDisplay code={asset.qrCode} label={asset.tag} />
+            <QRDisplay code={`${window.location.origin}/assets/details/${asset.id}`} label={asset.tag} />
           </Card>
 
           <Card className="border-white/[0.07] bg-white/[0.03]">

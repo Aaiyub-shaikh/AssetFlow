@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, Search, SlidersHorizontal, Eye,
-  Package, Filter, X
+  Package, Filter, X, QrCode
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,7 @@ import type { Asset, AssetStatus } from '@/types'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import { QRScannerDialog } from '@/components/shared/qr-scanner'
 
 const ALL_STATUSES: AssetStatus[] = ['available', 'allocated', 'reserved', 'maintenance', 'retired', 'lost']
 const STATUS_COLORS: Record<string, string> = {
@@ -103,6 +104,7 @@ export function AssetsPage() {
   const [filterDept, setFilterDept] = useState('all')
   const [showFilters, setShowFilters] = useState(false)
   const [view, setView] = useState<'grid' | 'table'>('grid')
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   const canRegister = ['admin', 'manager'].includes(user?.role ?? '')
 
@@ -136,13 +138,22 @@ export function AssetsPage() {
               Register, search, and track all organisational assets centrally
             </p>
           </div>
-          {canRegister && (
-            <Link to="/assets/register">
-              <Button className="gap-2 shrink-0">
-                <Plus className="h-4 w-4" /> Register Asset
-              </Button>
-            </Link>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              className="gap-2 border-white/10 hover:bg-white/5"
+              onClick={() => setScannerOpen(true)}
+            >
+              <QrCode className="h-4 w-4 text-primary" /> Scan QR
+            </Button>
+            {canRegister && (
+              <Link to="/assets/register">
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" /> Register Asset
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Status summary chips */}
@@ -296,6 +307,8 @@ export function AssetsPage() {
           </div>
         )}
       </div>
+
+      <QRScannerDialog open={scannerOpen} onClose={() => setScannerOpen(false)} />
     </PageShell>
   )
 }
