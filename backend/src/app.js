@@ -9,6 +9,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/resources", resourceRoutes);
+
 // Health Check Route
 app.get("/", (req, res) => {
   res.json({
@@ -25,4 +29,3 @@ app.get("/api/health", (req, res) => {
 });
 
 export default app;
->>>>>>> main
