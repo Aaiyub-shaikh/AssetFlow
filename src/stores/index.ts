@@ -291,17 +291,4 @@ export const useUIStore = create<UIState>()(
   )
 )
 
-interface NotificationState {
-  unreadCount: number
-  markAsRead: (id: string) => void
-  markAllAsRead: () => void
-}
-
-export const useNotificationStore = create<NotificationState>()((set) => ({
-  unreadCount: 3,
-  markAsRead: (id: string) => {
-    void id
-    set((s) => ({ unreadCount: Math.max(0, s.unreadCount - 1) }))
-  },
-  markAllAsRead: () => set({ unreadCount: 0 }),
-}))
+export { useNotificationStore } from './notificationStore'

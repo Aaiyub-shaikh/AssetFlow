@@ -26,7 +26,7 @@ export function DashboardPage() {
     const scheduled = new Date(record.scheduledDate)
     return record.status !== 'completed' && scheduled.getFullYear() === today.getFullYear() && scheduled.getMonth() === today.getMonth() && scheduled.getDate() === today.getDate()
   }).length
-  const activeBookings = bookings.filter((booking) => ['confirmed', 'pending'].includes(booking.status)).length
+  const activeBookings = bookings.filter((booking) => ['upcoming', 'ongoing'].includes(booking.status)).length
   const pendingTransfers = transfers.filter((transfer) => transfer.status === 'pending').length
 
   const returnItems = allocations

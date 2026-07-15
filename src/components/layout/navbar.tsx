@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Search, Bell, Menu, Sun, Moon, LogOut, User, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { Search, Bell, Menu, Sun, Moon, LogOut, User, Settings, QrCode } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore, useUIStore, useNotificationStore } from '@/stores'
 import { getRouteMeta } from '@/config/routes'
+import { QRScannerDialog } from '@/components/shared/qr-scanner'
 
 export function Navbar() {
   const location = useLocation()
@@ -16,9 +18,11 @@ export function Navbar() {
   const { setSidebarMobileOpen, setCommandPaletteOpen, theme, toggleTheme } = useUIStore()
   const { unreadCount } = useNotificationStore()
   const routeMeta = getRouteMeta(location.pathname)
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-xl lg:px-6">
+    <>
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-xl lg:px-6">
       <Button
         variant="ghost"
         size="icon"
@@ -50,6 +54,16 @@ export function Navbar() {
 
       <Button variant="ghost" size="icon" onClick={toggleTheme} className="hidden sm:flex">
         {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="hidden sm:flex"
+        onClick={() => setScannerOpen(true)}
+        title="Scan QR Code"
+      >
+        <QrCode className="h-4 w-4" />
       </Button>
 
       <Link to="/notifications" className="relative">
@@ -100,5 +114,8 @@ export function Navbar() {
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
+
+    <QRScannerDialog open={scannerOpen} onClose={() => setScannerOpen(false)} />
+  </>
   )
 }

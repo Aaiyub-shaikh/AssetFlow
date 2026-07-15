@@ -1,37 +1,4 @@
 {
-<<<<<<< HEAD
-  "name": "assetflow-backend",
-  "version": "1.0.0",
-  "description": "Enterprise Asset & Resource Management System Backend",
-  "main": "server.js",
-  "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "seed": "node src/seed/seed.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cloudinary": "^2.5.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "exceljs": "^4.4.0",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
-    "express-validator": "^7.2.1",
-    "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.3",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.16",
-    "pdfkit": "^0.16.0",
-    "qrcode": "^1.5.4",
-    "socket.io": "^4.8.1",
-    "uuid": "^11.0.3"
-  }
-}
-=======
   "name": "backend",
   "version": "1.0.0",
   "description": "AssetFlow Backend",
@@ -50,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -59,4 +27,3 @@
     "nodemon": "^3.1.14"
   }
 }
->>>>>>> 0aa1a72595887b158bf369f4d99479c03f0a5902

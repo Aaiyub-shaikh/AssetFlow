@@ -38,7 +38,8 @@ Use these credentials to explore different role-based views:
 | Role | Email | Password | Access Level |
 |------|-------|----------|--------------|
 | **Admin** | `admin@assetflow.io` | `admin123` | Full system access — manage users, departments, assets, audits, reports, and settings |
-| **Manager** (Dept. Head) | `manager@assetflow.io` | `manager123` | Department-level access — manage department assets, approve transfers, view reports |
+| **Manager** (Asset Head) | `manager@assetflow.io` | `manager123` | Department-level access — manage department assets, approve transfers, view reports |
+| **Manager** (Dept. Head) | `manager@assetflow.com` | `head@123` | Department-level access — manage department assets, approve transfers, view reports |
 | **Employee** | `employee@assetflow.io` | `employee123` | Personal access — view assigned assets, request transfers, book resources |
 
 ### Role Hierarchy  
