@@ -41,9 +41,9 @@ Use these credentials to explore different role-based views:
 | **Manager** (Dept. Head) | `manager@assetflow.io` | `manager123` | Department-level access — manage department assets, approve transfers, view reports |
 | **Employee** | `employee@assetflow.io` | `employee123` | Personal access — view assigned assets, request transfers, book resources |
 
-### Role Hierarchy
+### Role Hierarchy  
 
-- **Admin**: Full control. Can create/promote Department Heads and Asset Managers from the Employee Directory.
+- **Admin**: Full control. Can create/promote Department Heads and Asset Managers from the Employee Directory with all the controls.
 - **Manager**: Department-scoped. Can manage assets within their department, approve/reject transfers, and view department reports.
 - **Employee**: Self-service. Can view their own assets, make booking requests, and submit transfer requests. This is the default role assigned during signup.
 
